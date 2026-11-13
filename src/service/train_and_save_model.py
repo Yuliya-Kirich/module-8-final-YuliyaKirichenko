@@ -49,7 +49,7 @@ def build_model(features: list[str]) -> Pipeline:
 
     preprocessor = ColumnTransformer(
         transformers=[
-            ("num", numeric_transformer, features),
+            ("num", numeric_transformer, list(range(len(features)))),
         ],
         remainder="drop",
     )
