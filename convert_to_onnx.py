@@ -25,38 +25,31 @@ FEATURES = [
 
 
 def main():
-    # 1. Загружаем обученную sklearn-модель
     model = joblib.load(MODEL_PATH)
     print("Sklearn-модель загружена")
 
-    # 2. Проверяем порядок признаков
     actual_features = list(model.feature_names_in_)
     if actual_features != FEATURES:
         raise ValueError(
             f"Несовпадение признаков: {actual_features}"
         )
 
-    # 3. Описываем входы ONNX
     initial_types = [
         (feature, FloatTensorType([None, 1]))
         for feature in FEATURES
     ]
 
-    # 4. Конвертируем Pipeline
     onnx_model = convert_sklearn(
         model,
         initial_types=initial_types,
         target_opset=17,
     )
 
-    # 5. Проверяем структуру ONNX
     onnx.checker.check_model(onnx_model)
 
-    # 6. Сохраняем модель
     onnx.save_model(onnx_model, str(ONNX_PATH))
     print(f"ONNX-модель сохранена: {ONNX_PATH}")
 
-    # 7. Загружаем тестовые данные
     df = pd.read_csv(DATA_PATH)
     df = df.replace([np.inf, -np.inf], np.nan)
     df = df.dropna(subset=FEATURES).head(10)
@@ -66,10 +59,8 @@ def main():
 
     X = df[FEATURES].astype(np.float32)
 
-    # 8. Предсказания sklearn
     sklearn_predictions = model.predict(X)
 
-    # 9. Предсказания ONNX Runtime
     session = ort.InferenceSession(
         str(ONNX_PATH),
         providers=["CPUExecutionProvider"],
@@ -84,7 +75,6 @@ def main():
         None, onnx_inputs
     )[0].ravel()
 
-    # 10. Сравниваем результаты
     max_difference = np.max(
         np.abs(sklearn_predictions - onnx_predictions)
     )
