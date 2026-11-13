@@ -1,0 +1,52 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.aws/
+kubeconfig
+*.kubeconfig
+
+# PyCharm and other IDEs
+.idea/
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Model artifacts
+*.pkl
+*.pickle
+*.joblib
+*.onnx
+
+# Kubernetes secrets
+k8s/secret.yaml
+k8s/*credentials*.yaml
+!k8s/secret.template.yaml
+
+# Generated files
+*.log
+logs/
+build/
+dist/
+*.egg-info/
+
+# Operating system
+.DS_Store
+Thumbs.db
