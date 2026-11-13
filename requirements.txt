@@ -9,4 +9,6 @@ pytest~=8.4.0
 httpx~=0.28.1
 s3fs==2025.7.0
 pandera==0.24.0
-ruff==0.12.10
+skl2onnx==1.20.0
+onnx==1.23.2
+onnxruntime==1.23.2
