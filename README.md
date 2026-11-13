@@ -1,88 +1,31 @@
-# Module 8 Сервис рекомендации цен на поездку такси.
 
-## Структура проекта
+## 5) KServe
+
+Проверка InferenceService:
+
 ```bash
-├── src - сервис для запуска API и обучения модели
+kubectl get inferenceservice -n std
 ```
 
-## Быстрый старт
+![InferenceService.png](docs%2FInferenceService.png)
 
-- **Требования**: Python 3.12 (см. `.python-version`), macOS/zsh
-- **Путь проекта**: `<path_to_project>`
+### ServiceAccount и Secret
 
-### 1) Установка окружения
 ```bash
-cd <path_to_project>
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+kubectl get serviceaccount taxi-s3-sa -n std
+kubectl get secret taxi-s3-secret -n std
 ```
 
-### 2) Запуск API
-Вариант A (рекомендуется, с авто‑перезапуском):
-```bash
-cd <path_to_project>
-source .venv/bin/activate
-uvicorn main:app --app-dir <path_to_project>/src/service --host 0.0.0.0 --port 32000 --reload
-```
+![ServiceAccount_Secret.png](docs%2FServiceAccount_Secret.png)
 
-Вариант B (через модуль Python):
-```bash
-cd <path_to_project>
-source .venv/bin/activate
-python -m src.service.main  
-```
+### Проверка API V2
 
-Проверка:
 ```bash
-curl -s http://127.0.0.1:32000/
-```
-Документация Swagger будет по адресу:
-- `http://127.0.0.1:32000/docs`
-
-Пример запроса на предсказание:
-```bash
-curl -s -X POST http://127.0.0.1:32000/api/predict/ \
+curl -sS -i -X POST \
+  http://127.0.0.1:8082/v2/models/taxi-price-inference/infer \
+  -H 'Host: taxi-price-inference-predictor.std.svc.cluster.local' \
   -H 'Content-Type: application/json' \
-  -d '{
-        "data": [
-          {
-            "pickup_latitude": 40.7614327,
-            "pickup_longitude": -73.9798156,
-            "dropoff_latitude": 40.6413111,
-            "dropoff_longitude": -73.7781391,
-            "passenger_count": 2
-          }
-        ]
-      }'
+  -d @k8s/inference_request.json
 ```
-
-UI-форма (простая HTML):
-- `http://127.0.0.1:32000/predict/form/`
-
-### 3) Обучение модели
-Скрипт обучения читает датасет `src/uber.csv` и сохраняет модель в `src/service/model.pkl`.
-
-Быстрый запуск по умолчанию:
-```bash
-cd <path_to_project>
-source .venv/bin/activate
-python <path_to_project>/src/service/train_and_save_model.py
-```
-
-С указанием параметров:
-```bash
-python <path_to_project>/src/service/train_and_save_model.py \
-  --csv <path_to_project>/src/uber.csv \
-  --output <path_to_project>/src/service/model.pkl \
-  --test-size 0.2 \
-  --random-state 42
-```
-
-- **Ожидаемые колонки** в CSV: `pickup_latitude`, `pickup_longitude`, `dropoff_latitude`, `dropoff_longitude`, `passenger_count`, таргет — `fare_amount`.
-- После обучения сервис автоматически начнёт использовать обновлённый `model.pkl` при следующем запуске.
-
-### 4) Полезное
-- Установка зависимостей повторно: `pip install -r requirements.txt`
-- Запуск тестов: `pytest`
+Ответ API v2
+![inference-v2.png](docs%2Finference-v2.png)
