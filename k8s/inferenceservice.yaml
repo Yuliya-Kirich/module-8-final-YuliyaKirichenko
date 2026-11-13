@@ -1,0 +1,30 @@
+
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: taxi-price-inference
+  namespace: std
+  annotations:
+    serving.kserve.io/deploymentMode: "Knative"
+    autoscaling.knative.dev/initial-scale: "2"
+    autoscaling.knative.dev/targetUtilizationPercentage: "70"
+spec:
+  predictor:
+    serviceAccountName: taxi-s3-sa
+    minReplicas: 1
+    maxReplicas: 5
+    scaleMetric: rps
+    scaleTarget: 50
+    model:
+      modelFormat:
+        name: sklearn
+      runtime: kserve-sklearnserver
+      protocolVersion: v2
+      storageUri: s3://mlops-module8-final-yuliya-kirichenko-2026/model_dir/
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "512Mi"
+        limits:
+          cpu: "1"
+          memory: "1Gi"
