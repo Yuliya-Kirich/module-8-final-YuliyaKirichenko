@@ -158,6 +158,8 @@ python benchmark_onnx.py
 | Max replicas | 5 |
 | Initial scale | 2 |
 
+![Knative.png](docs%2FKnative.png)
+
 Результаты нагрузочного тестирования (`load_test.py`):
 
 | Показатель | Значение |
